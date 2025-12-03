@@ -1,37 +1,37 @@
 const express = require("express");
-//const cors = require("cors");
+const cors = require("cors");
+const mongoose = require("mongoose");
 
 const app = express();
 
-// parse requests of content-type - application/json
+// Middlewares
+app.use(cors());
 app.use(express.json());
-
-// parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
-const db = require("./app/models");
-db.mongoose
-  .connect(db.url, {
+// MongoDB Connection
+const MONGO_URL = process.env.MONGO_URL || "mongodb://localhost:27017/cruddb";
+
+mongoose
+  .connect(MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
-  .then(() => {
-    console.log("Connected to the database!");
-  })
-  .catch(err => {
-    console.log("Cannot connect to the database!", err);
-    process.exit();
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((err) => {
+    console.error("❌ MongoDB Connection Error:", err);
+    process.exit(1);
   });
 
-// simple route
+// Default route
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to Test application." });
+  res.json({ message: "Backend is running ✔️" });
 });
 
-require("./app/routes/turorial.routes")(app);
+// Routes
+require("./app/routes/tutorial.routes")(app);
 
-// set port, listen for requests
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
-});
+// Server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
